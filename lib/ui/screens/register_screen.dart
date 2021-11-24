@@ -6,21 +6,23 @@ import 'package:flutter/painting.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:wind/register_screen.dart';
+import 'package:wind/ui/screens/register_screen.dart';
 import 'package:wind/utils/info.dart';
 import 'package:wind/utils/shared_pref.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   bool isLoading = false;
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -62,6 +64,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(
                         height: 7,
                       ),
+                      inputField(_usernameController, "Username",
+                          TextInputType.emailAddress, false),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       inputField(_emailController, "Sunrin Email",
                           TextInputType.emailAddress, false),
                       const SizedBox(
@@ -70,16 +77,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       inputField(_passwordController, "Password",
                           TextInputType.visiblePassword, true),
                       const SizedBox(
+                        height: 15,
+                      ),
+                      inputField(_confirmPasswordController, "Confirm Password",
+                          TextInputType.visiblePassword, true, pwd: _passwordController.text),
+                      const SizedBox(
                         height: 25,
                       ),
                       InkWell(
                         splashColor: const Color(0x85EF7C8E),
                         onTap: () {
                           if (!_formKey.currentState!.validate()) {
-                            Fluttertoast.showToast(msg: "이메일 또는 비밀번호를 입력해주세요.");
+                            Fluttertoast.showToast(msg: "제대로 입력해주세요.");
                             return;
                           }
-                          login(_emailController.text, _passwordController.text);
+                          register(_usernameController.text, _emailController.text, _passwordController.text);
                           setState(() {
                             isLoading = true;
                           });
@@ -88,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 45,
                           child: const Center(
-                            child: Text("Login",
+                            child: Text("Register",
                                 style: TextStyle(
                                     color: Color(0xFFEF7C8E),
                                     fontFamily: "NotoSansKR",
@@ -106,43 +118,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      Align(
-                          alignment: Alignment.centerRight,
-                          child: MaterialButton(
-                            onPressed: () {},
-                            splashColor: const Color(0xFFEF7C8E),
-                            child: const Text("Forgot Password?",
-                                style: TextStyle(
-                                    color: Color(0xFFEF7C8E),
-                                    fontFamily: "NotoSansKR",
-                                    fontSize: 15)),
-                          )),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 127),
-              MaterialButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const RegisterScreen()));
-                },
-                splashColor: const Color(0xFFEF7C8E),
-                child: const Text.rich(TextSpan(
-                    text: "Don't have an account?",
-                    style: TextStyle(
-                        color: Color(0xFFEF7C8E),
-                        fontFamily: "NotoSansKR",
-                        fontSize: 15),
-                    children: <TextSpan>[
-                      TextSpan(
-                          text: ' Sing Up',
-                          style: TextStyle(
-                              color: Color(0xFFEF7C8E),
-                              fontSize: 15,
-                              fontFamily: "NotoSansKR",
-                              fontWeight: FontWeight.bold)),
-                    ])),
               ),
             ],
           ),
@@ -151,9 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  login(email, password) async {
-    Map data = {'email': email, 'password': password};
-    final response = await http.post(Uri.parse(Info().getAPILogin()),
+  register(username, email, password) async {
+    Map data = {'name': username, 'email': email, 'password': password};
+    final response = await http.post(Uri.parse(Info.REGISTER),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/x-www-form-urlencoded"
@@ -169,9 +147,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 201) {
       if (_response['error'] == null) {
         Map<String, dynamic> data = _response['payload'];
-        print("Token: ${data['token']}");
-        StorageManager.saveData('token', data['token']);
-        Fluttertoast.showToast(msg: "Login Success!!");
+        print("Message: ${data['message']}");
+        Fluttertoast.showToast(msg: "Register Success!!");
       } else {
         print("${_response['payload']['message']}");
       }
@@ -182,24 +159,33 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 TextFormField inputField(TextEditingController controller, String hintText,
-    TextInputType type, bool isPassword) {
+    TextInputType type, bool isPassword, {String? pwd = "None"}) {
   return TextFormField(
     controller: controller,
     validator: (val) {
       switch(hintText) {
+        case "Username": if (val!.isEmpty) return "유저명을 입력해주세요."; break;
         case "Sunrin Email": if (val!.isEmpty) return "이메일을 입력해주세요."; break;
         case "Password": if (val!.isEmpty) return "패스워드를 입력해주세요."; break;
+        case "Confirm Password": {
+          if (val!.isEmpty) {
+            return "패스워드를 입력해주세요.";
+          } else if(val != pwd || pwd == "None") {
+            return "패스워드가 일치하지 않습니다.";
+          }
+          break;
+        }
       }
     },
     decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 5.0),
-        fillColor: Colors.transparent,
-        border: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
-        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFB6E2D3))),
-        enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
-        labelText: hintText,
-        labelStyle: const TextStyle(color: Color(0xFFEF7C8E), fontSize: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 5.0),
+      fillColor: Colors.transparent,
+      border: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
+      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFB6E2D3))),
+      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
+      hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+      labelText: hintText,
+      labelStyle: const TextStyle(color: Color(0xFFEF7C8E), fontSize: 16),
     ),
     cursorColor: const Color(0xFFEF7C8E),
     keyboardType: type,

@@ -16,7 +16,7 @@ class StorageManager {
 
   static Future<dynamic> readData(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    dynamic obj = prefs.get(key);
+    dynamic? obj = prefs.get(key);
     return obj;
   }
 
@@ -24,4 +24,5 @@ class StorageManager {
     final prefs = await SharedPreferences.getInstance();
     return prefs.remove(key);
   }
+
 }
