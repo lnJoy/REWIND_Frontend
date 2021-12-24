@@ -9,7 +9,7 @@ part of 'wind_websocket_response.dart';
 WINDWebSocketResponse _$WINDWebSocketResponseFromJson(Map<String, dynamic> json) =>
     WINDWebSocketResponse(
       json['type'] as String,
-      json['payload'] as Map<String, dynamic>,
+      json['payload'] as dynamic,
     );
 
 Map<String, dynamic> _$WINDWebSocketResponseToJson(WINDWebSocketResponse instance) =>

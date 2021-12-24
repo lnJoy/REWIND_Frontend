@@ -13,9 +13,7 @@ import 'package:wind/utils/info.dart';
 import 'package:wind/utils/shared_pref.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key, required this.provider}) : super(key: key);
-
-  final WINDWebSocketProvider provider;
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -38,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     String? _token;
     _token = await StorageManager.readData("token");
     if (_token != null) {
-      Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) => LobbyScreen(provider: widget.provider,)));
+      Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) => LobbyScreen()));
     }
   }
 
@@ -143,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const RegisterScreen()));
+                      builder: (context) => RegisterScreen()));
                 },
                 splashColor: const Color(0xFFEF7C8E),
                 child: const Text.rich(TextSpan(
@@ -192,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Fluttertoast.showToast(msg: "Login Success!!");
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (BuildContext context) => LobbyScreen(provider: widget.provider,),
+            builder: (BuildContext context) => LobbyScreen(),
           ),
         );
       } else {

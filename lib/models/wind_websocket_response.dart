@@ -5,7 +5,7 @@ part 'wind_websocket_response.g.dart';
 @JsonSerializable()
 class WINDWebSocketResponse {
   final String type;
-  final Map<String, dynamic> payload;
+  final dynamic payload;
 
   WINDWebSocketResponse(this.type, this.payload);
 
@@ -13,4 +13,7 @@ class WINDWebSocketResponse {
       _$WINDWebSocketResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$WINDWebSocketResponseToJson(this);
+
+  @override
+  String toString() => '$payload';
 }

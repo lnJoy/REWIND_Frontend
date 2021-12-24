@@ -5,17 +5,14 @@ import 'package:wind/providers/wind_websocket_provider.dart';
 import 'package:wind/ui/screens/login_screen.dart';
 
 class WINDApp extends StatelessWidget {
-  late final WINDWebSocketProvider _provider;
 
-  WINDApp({Key? key})
-      : _provider = WINDWebSocketProvider(),
-        super(key: key);
+  WINDApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WIND',
-      home: LoginScreen(provider: _provider),
+      home: LoginScreen(),
       builder: EasyLoading.init(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

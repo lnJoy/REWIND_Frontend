@@ -6,6 +6,9 @@ import 'package:flutter/painting.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:wind/providers/wind_websocket_provider.dart';
+import 'package:wind/ui/screens/login_screen.dart';
 import 'package:wind/ui/screens/register_screen.dart';
 import 'package:wind/utils/info.dart';
 import 'package:wind/utils/shared_pref.dart';
@@ -149,6 +152,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Map<String, dynamic> data = _response['payload'];
         print("Message: ${data['message']}");
         Fluttertoast.showToast(msg: "Register Success!!");
+        Navigator.of(context).pop(
+          MaterialPageRoute(
+            builder: (BuildContext context) => LoginScreen(),
+          ),
+        );
       } else {
         print("${_response['payload']['message']}");
       }
@@ -159,7 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 }
 
 TextFormField inputField(TextEditingController controller, String hintText,
-    TextInputType type, bool isPassword, {String? pwd = "None"}) {
+    TextInputType type, bool isPassword, {String? pwd}) {
   return TextFormField(
     controller: controller,
     validator: (val) {
@@ -170,7 +178,7 @@ TextFormField inputField(TextEditingController controller, String hintText,
         case "Confirm Password": {
           if (val!.isEmpty) {
             return "패스워드를 입력해주세요.";
-          } else if(val != pwd || pwd == "None") {
+          } else if(val != pwd || pwd == null) {
             return "패스워드가 일치하지 않습니다.";
           }
           break;
