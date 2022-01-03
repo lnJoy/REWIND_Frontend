@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:wind/components/mutual_requests_list.dart';
 import 'package:wind/models/wind_mutual_users_model.dart';
 import 'package:wind/models/wind_user_model.dart';
@@ -25,7 +26,8 @@ class MutualRequestScreen extends StatefulWidget {
 class _MutualRequestScreenState extends State<MutualRequestScreen> {
   List<User> _mutualReqeusts = [];
 
-  TextEditingController _WINDUsernameController = TextEditingController();
+  final TextEditingController _WINDUsernameController = TextEditingController();
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   @override
   void didChangeDependencies() {
@@ -48,9 +50,7 @@ class _MutualRequestScreenState extends State<MutualRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SafeArea(
@@ -98,7 +98,7 @@ class _MutualRequestScreenState extends State<MutualRequestScreen> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
+              padding: const EdgeInsets.only(left: 16, right: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const <Widget>[
@@ -111,22 +111,21 @@ class _MutualRequestScreenState extends State<MutualRequestScreen> {
             ),
           ),
           _mutualReqeusts.isNotEmpty
-              ? ListView.builder(
-                  itemCount: _mutualReqeusts.length,
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.only(top: 16),
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return MutualReqeustList(
-                        id: _mutualReqeusts[index].id,
-                        name: _mutualReqeusts[index].name,
-                        profile: _mutualReqeusts[index].profile,
-                        provider: widget.provider);
-                  },
+              ? Expanded(
+                  child: ListView.builder(
+                    itemCount: _mutualReqeusts.length,
+                    padding: const EdgeInsets.only(top: 16),
+                    itemBuilder: (context, index) {
+                      return MutualReqeustList(
+                          id: _mutualReqeusts[index].id,
+                          name: _mutualReqeusts[index].name,
+                          profile: _mutualReqeusts[index].profile,
+                          provider: widget.provider);
+                    },
+                  ),
                 )
-              : Center(child: const Text("친구 요청이 없습니다.")),
+              : const Expanded(child: Center(child: Text("친구 요청이 없습니다."))),
         ],
-      ),
     );
   }
 }

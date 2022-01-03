@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:wind/ui/app.dart';
 
 void main() {
-  runApp(WINDApp());
+  runApp(const WINDApp());
 }
 
 

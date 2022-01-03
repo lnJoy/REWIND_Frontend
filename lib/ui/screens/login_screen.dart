@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 15),
                     children: <TextSpan>[
                       TextSpan(
-                          text: ' Sing Up',
+                          text: ' Sign Up',
                           style: TextStyle(
                               color: Color(0xFFEF7C8E),
                               fontSize: 15,
@@ -188,9 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
         print("Token: ${data['token']}");
         StorageManager.saveData('token', data['token']);
         Fluttertoast.showToast(msg: "Login Success!!");
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) => LobbyScreen(),
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (BuildContext context) => const LobbyScreen(),
           ),
         );
       } else {

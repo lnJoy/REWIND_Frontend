@@ -109,6 +109,19 @@ class WINDWebSocketProvider {
     );
   }
 
+  void WINDLoadMutualRequests() async {
+    _WINDWebSocket.sink.add(
+      jsonEncode(
+        WINDWebSocketRequest(
+            'auth',
+            {
+              'auth': await StorageManager.readData('token'),
+            }
+        ).toJson(),
+      ),
+    );
+  }
+
   Future<void> WINDLoadChatContents({required String chatID, required String datetime, int count = 50}) async {
     _WINDWebSocket.sink.add(
       jsonEncode(

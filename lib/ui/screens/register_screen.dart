@@ -27,6 +27,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
+  String? password;
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -67,23 +69,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(
                         height: 7,
                       ),
-                      inputField(_usernameController, "Username",
-                          TextInputType.emailAddress, false),
+                      TextFormField(
+                        controller: _usernameController,
+                        cursorColor: const Color(0xFFEF7C8E),
+                        keyboardType: TextInputType.text,
+                        obscureText: false,
+                        decoration: inputDecoration("Username"),
+                        validator: (val) {
+                          if (val!.isEmpty) return "유저명을 입력해주세요.";
+                        },
+                      ),
                       const SizedBox(
                         height: 15,
                       ),
-                      inputField(_emailController, "Sunrin Email",
-                          TextInputType.emailAddress, false),
+                      TextFormField(
+                        controller: _emailController,
+                        cursorColor: const Color(0xFFEF7C8E),
+                        keyboardType: TextInputType.emailAddress,
+                        obscureText: false,
+                        decoration: inputDecoration("Sunrin Email"),
+                        validator: (val) {
+                          if (val!.isEmpty) return "이메일을 입력해주세요.";
+                        },
+                      ),
                       const SizedBox(
                         height: 15,
                       ),
-                      inputField(_passwordController, "Password",
-                          TextInputType.visiblePassword, true),
+                      TextFormField(
+                        controller: _passwordController,
+                        cursorColor: const Color(0xFFEF7C8E),
+                        keyboardType: TextInputType.visiblePassword,
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: inputDecoration("Password"),
+                        validator: (val) {
+                          if (val!.isEmpty) return "비밀번호를 입력해주세요.";
+                        },
+                      ),
                       const SizedBox(
                         height: 15,
                       ),
-                      inputField(_confirmPasswordController, "Confirm Password",
-                          TextInputType.visiblePassword, true, pwd: _passwordController.text),
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        cursorColor: const Color(0xFFEF7C8E),
+                        keyboardType: TextInputType.visiblePassword,
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: inputDecoration("Confirm Password"),
+                        validator: (val) {
+                          if (val!.isEmpty) {
+                            return "비밀번호를 입력해주세요.";
+                          } else {
+                            if (val != _passwordController.text) {
+                              return "비밀번호가 일치하지 않습니다.";
+                            }
+                          }
+                        },
+                      ),
                       const SizedBox(
                         height: 25,
                       ),
@@ -94,6 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Fluttertoast.showToast(msg: "제대로 입력해주세요.");
                             return;
                           }
+                          // _formKey.currentState!.validate();
                           register(_usernameController.text, _emailController.text, _passwordController.text);
                           setState(() {
                             isLoading = true;
@@ -166,39 +211,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-TextFormField inputField(TextEditingController controller, String hintText,
-    TextInputType type, bool isPassword, {String? pwd}) {
-  return TextFormField(
-    controller: controller,
-    validator: (val) {
-      switch(hintText) {
-        case "Username": if (val!.isEmpty) return "유저명을 입력해주세요."; break;
-        case "Sunrin Email": if (val!.isEmpty) return "이메일을 입력해주세요."; break;
-        case "Password": if (val!.isEmpty) return "패스워드를 입력해주세요."; break;
-        case "Confirm Password": {
-          if (val!.isEmpty) {
-            return "패스워드를 입력해주세요.";
-          } else if(val != pwd || pwd == null) {
-            return "패스워드가 일치하지 않습니다.";
-          }
-          break;
-        }
-      }
-    },
-    decoration: InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 5.0),
-      fillColor: Colors.transparent,
-      border: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
-      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFB6E2D3))),
-      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
-      labelText: hintText,
-      labelStyle: const TextStyle(color: Color(0xFFEF7C8E), fontSize: 16),
-    ),
-    cursorColor: const Color(0xFFEF7C8E),
-    keyboardType: type,
-    obscureText: isPassword,
-    enableSuggestions: !isPassword,
-    autocorrect: !isPassword,
+InputDecoration inputDecoration(String hintText) {
+  return InputDecoration(
+    contentPadding: const EdgeInsets.symmetric(horizontal: 5.0),
+    fillColor: Colors.transparent,
+    border: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
+    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFB6E2D3))),
+    enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(width: 1.0, color: Color(0xFFEF7C8E))),
+    hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+    labelText: hintText,
+    labelStyle: const TextStyle(color: Color(0xFFEF7C8E), fontSize: 16),
   );
 }

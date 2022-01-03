@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -34,24 +35,18 @@ class _ChatScreenState extends State<ChatScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
+  StreamSubscription? subscription;
+  // subscription.onData((event) async {
+  //   print('ASD: $event');
+  //   if (event.type == "chat") {
+  //     _lastMessage = await event.payload['content'];
+
   @override
   void initState() {
-    // if (!_enableWebSocket) widget.provider.openWIND();
-    // setState(() => _enableWebSocket = true);
-    // widget.provider.windStream.listen((data) async {
-    //   if(await data.type == "chat") {
-    //     while (true) {
-    //       if (!_isUsed) {
-    //         break;
-    //       }
-    //     }
-    //     _isUsed = true;
-    //     MessageManager(await data.payload, _isRefresh);
-    //     _isUsed = false;
-    //   }
-    // });
-    widget.provider.windStream.listen((data) async {
+    subscription = widget.provider.windStream.listen(null);
+    subscription!.onData((data) async {
       if (data.type == "chat") {
+        print(data);
         MessageManager(await data.payload);
       }
     });
@@ -59,12 +54,13 @@ class _ChatScreenState extends State<ChatScreen> {
         DateFormat('yyyy-M-d HH:mm:ss.S000', 'ko_KR')
             .format(DateTime.now().toUtc().add(const Duration(hours: 9)))));
     widget.provider.WINDLoadChatContents(
-        chatID: widget.chatID.toString(), datetime: _datetime, count: 60);
+        chatID: widget.chatID.toString(), datetime: _datetime, count: 50);
     super.initState();
   }
 
   @override
   void dispose() {
+    subscription!.cancel();
     super.dispose();
   }
 
@@ -128,10 +124,10 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: SmartRefresher(
               controller: _refreshController,
-              onRefresh: _onRefresh,
-              onLoading: _onLoading,
-              enablePullDown: false,
-              enablePullUp: true,
+              // onRefresh: _onRefresh,
+              // onLoading: _onLoading,
+              // enablePullDown: false,
+              // enablePullUp: true,
               child: ListView.builder(
                 itemCount: _items.length,
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -213,27 +209,27 @@ class _ChatScreenState extends State<ChatScreen> {
     String _messageType = payload['user_id'] == userId ? "sender" : "receiver";
     if (mounted) {
       setState(() {
-        if (_items.isNotEmpty) {
-          if(DateTime.parse(payload['created_at']).compareTo(DateTime.parse(_items.last.messageCreatedAt.toString())) < 0) {
-            _items.add(MessageItem(
-                chatid: int.parse(payload['chat_id']),
-                messageType: _messageType,
-                messageContent: payload['content'],
-                messageCreatedAt: payload['created_at']));
-          }else {
-            for(var i = 0; i < _items.length - 1; i++) {
-              if(DateTime.parse(_items.toList().elementAt(i).messageCreatedAt).millisecondsSinceEpoch < DateTime.parse(payload['created_at']).millisecondsSinceEpoch &&
-                  DateTime.parse(payload['created_at']).millisecondsSinceEpoch < DateTime.parse(_items.toList().elementAt(i + 1).messageCreatedAt).millisecondsSinceEpoch) {
-                _items.insert(i, MessageItem(
-                    chatid: int.parse(payload['chat_id']),
-                    messageType: _messageType,
-                    messageContent: payload['content'],
-                    messageCreatedAt: payload['created_at']));
-                return;
-              }
-            }
-          }
-        }
+        // if (_items.isNotEmpty) {
+        //   if(DateTime.parse(payload['created_at']).compareTo(DateTime.parse(_items.last.messageCreatedAt.toString())) < 0) {
+        //     _items.add(MessageItem(
+        //         chatid: int.parse(payload['chat_id']),
+        //         messageType: _messageType,
+        //         messageContent: payload['content'],
+        //         messageCreatedAt: payload['created_at']));
+        //   }else {
+        //     for(var i = 0; i < _items.length - 1; i++) {
+        //       if(DateTime.parse(_items.toList().elementAt(i).messageCreatedAt).millisecondsSinceEpoch < DateTime.parse(payload['created_at']).millisecondsSinceEpoch &&
+        //           DateTime.parse(payload['created_at']).millisecondsSinceEpoch < DateTime.parse(_items.toList().elementAt(i + 1).messageCreatedAt).millisecondsSinceEpoch) {
+        //         _items.insert(i, MessageItem(
+        //             chatid: int.parse(payload['chat_id']),
+        //             messageType: _messageType,
+        //             messageContent: payload['content'],
+        //             messageCreatedAt: payload['created_at']));
+        //         return;
+        //       }
+        //     }
+        //   }
+        // }
           _items.insert(0, MessageItem(
               chatid: int.parse(payload['chat_id']),
               messageType: _messageType,
@@ -250,21 +246,21 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _onRefresh() {
-    String _datetime = base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()));
-    // print('Last : ${base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()))}');
-    // print('First : ${base64.encode(utf8.encode(_items.first.messageCreatedAt.toString()))}');
-    widget.provider.WINDLoadChatContents(
-        chatID: widget.chatID.toString(), datetime: _datetime, count: 10);
-    _refreshController.refreshCompleted();
-  }
-
-  void _onLoading() {
-    String _datetime = base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()));
-    // print('Last : ${base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()))}');
-    // print('First : ${base64.encode(utf8.encode(_items.first.messageCreatedAt.toString()))}');
-    widget.provider.WINDLoadChatContents(
-        chatID: widget.chatID.toString(), datetime: _datetime, count: 10);
-    _refreshController.loadComplete();
-  }
+  // void _onRefresh() {
+  //   String _datetime = base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()));
+  //   // print('Last : ${base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()))}');
+  //   // print('First : ${base64.encode(utf8.encode(_items.first.messageCreatedAt.toString()))}');
+  //   widget.provider.WINDLoadChatContents(
+  //       chatID: widget.chatID.toString(), datetime: _datetime, count: 10);
+  //   _refreshController.refreshCompleted();
+  // }
+  //
+  // void _onLoading() {
+  //   String _datetime = base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()));
+  //   // print('Last : ${base64.encode(utf8.encode(_items.last.messageCreatedAt.toString()))}');
+  //   // print('First : ${base64.encode(utf8.encode(_items.first.messageCreatedAt.toString()))}');
+  //   widget.provider.WINDLoadChatContents(
+  //       chatID: widget.chatID.toString(), datetime: _datetime, count: 10);
+  //   _refreshController.loadComplete();
+  // }
 }
